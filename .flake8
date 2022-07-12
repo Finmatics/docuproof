@@ -1,0 +1,16 @@
+[flake8]
+filename = 
+    *.py,
+
+exclude = 
+    .git,
+    __pycache__
+
+ignore = 
+    ANN101,
+    ANN102,
+    ANN401,
+    # See https://github.com/PyCQA/pycodestyle/issues/373
+    E203,
+
+max_line_length = 120

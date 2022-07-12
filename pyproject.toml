@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "docuproof"
+version = "0.1.0"
+description = ""
+authors = ["Kamil Marut <kamil@kamilmarut.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+sanic = {extras = ["ext"], version = "^22.6.0"}
+web3 = {version = "6.0.0b3", allow-prereleases = true}
+
+[tool.poetry.dev-dependencies]
+isort = "^5.10.1"
+black = "^22.6.0"
+flake8 = "^4.0.1"
+flake8-annotations = "^2.9.0"
+mypy = "^0.961"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
