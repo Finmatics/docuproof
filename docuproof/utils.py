@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 
-from docuproof.config import config
+from tortoise import timezone
+
+from docuproof.config import Config
 
 
 def get_batch_threshold_dt() -> datetime:
-    timedelta_kwargs = {config.BATCH_TIME_UNIT: config.BATCH_TIME}
-    return datetime.now() - timedelta(**timedelta_kwargs)
+    timedelta_kwargs = {Config.BATCH_TIME_UNIT: Config.BATCH_TIME}
+    return timezone.now() - timedelta(**timedelta_kwargs)

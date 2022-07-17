@@ -3,7 +3,7 @@ from typing import Any
 
 from sanic import Blueprint
 from sanic.request import Request
-from sanic.response import HTTPResponse, text
+from sanic.response import HTTPResponse, json
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
 
@@ -21,7 +21,7 @@ class InputData:
 
 class SaveHashView(HTTPMethodView):
     def _validate(self, data: dict[str, Any]) -> None:
-        input_data = InputData(data)
+        input_data = InputData(**data)
         if not input_data.uuid:
             raise HttpBadRequest("Missing field `uuid`")
 
@@ -45,11 +45,21 @@ class SaveHashView(HTTPMethodView):
             self._validate(data)
             await create_file(batch=batch, uuid=data["uuid"], sha256=data["sha256"])
 
+        return json({"message": "Hash saved successfully", "status": 200})
+
 
 class ValidateView(HTTPMethodView):
     @validate(json=InputData)
-    async def post(self, request: Request) -> HTTPResponse:
-        return text("ValidateView")
+    async def post(self, request: Request, body: InputData) -> HTTPResponse:
+        if file := await File.filter(uuid=body.uuid).first():
+            if file.sha256 == body.sha256:
+                return json({"message": "Hash is valid", "status": 200})
+            else:
+                return json({"message": "Hash is invalid", "status": 200})
+
+        # Validate in blockchain if not found locally
+
+        return json({"message": "Hash validated successfully", "status": 200})
 
 
 bp.add_route(SaveHashView.as_view(), "/save")

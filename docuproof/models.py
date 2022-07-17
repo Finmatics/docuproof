@@ -13,7 +13,7 @@ class File(TimestampMixin, Model):
     uuid = fields.UUIDField()
     sha256 = fields.CharField(max_length=64)
 
-    batch = fields.ForeignKeyField("Batch", related_name="files", on_delete=fields.RESTRICT)
+    batch = fields.ForeignKeyField("models.Batch", related_name="files", on_delete=fields.RESTRICT)
 
 
 class Batch(TimestampMixin, Model):
@@ -23,7 +23,7 @@ class Batch(TimestampMixin, Model):
     async def get_current_batch() -> "Batch":
         threshold_dt = get_batch_threshold_dt()
         if not (batch := await Batch.filter(created_at__gt=threshold_dt).first()):
-            batch = Batch.create()
+            batch = await Batch.create()
         return batch
 
     async def upload(self) -> None:

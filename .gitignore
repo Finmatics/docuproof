@@ -1,3 +1,7 @@
+### Project ###
+*.db
+*.db-**
+
 ### Brownie ###
 .hypothesis/
 build/
