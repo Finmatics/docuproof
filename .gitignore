@@ -1,3 +1,8 @@
+### Brownie ###
+.hypothesis/
+build/
+reports/
+
 ### Docker ###
 docker-compose.override.yml
 

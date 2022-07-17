@@ -1,0 +1,18 @@
+project_structure:
+    build: build
+    contracts: contracts
+    interfaces: interfaces
+    reports: reports
+    scripts: scripts
+    tests: tests
+
+dependencies:
+    - OpenZeppelin/openzeppelin-contracts@4.7.0
+
+compiler:
+    solc:
+        remappings:
+            - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.0"
+
+networks:
+    default: ganache-gui
