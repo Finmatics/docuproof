@@ -7,8 +7,9 @@ authors = ["Kamil Marut <kamil@kamilmarut.com>"]
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 sanic = {extras = ["ext"], version = "^22.6.0"}
-web3 = {version = "6.0.0b3", allow-prereleases = true}
 tortoise-orm = "^0.19.2"
+web3 = {version = "6.0.0b3", allow-prereleases = true}
+ipfshttpclient = {version = "0.8.0a2", allow-prereleases = true}
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
