@@ -3,14 +3,13 @@ from typing import Any
 import ipfshttpclient as ipfs
 
 from docuproof.encoders import uuid_aware_json_encode
+from docuproof.meta import SingletonMeta
 
 
-class IPFSClient:
-    def __init__(self) -> None:
-        self.client = ipfs.connect(session=True)
-
-    def __del__(self) -> None:
-        self.close()
+class IPFSClient(metaclass=SingletonMeta):
+    def __new__(cls) -> "IPFSClient":
+        cls.client = ipfs.connect(session=True)
+        return super().__new__(cls)
 
     def close(self) -> None:
         self.client.close()
@@ -26,3 +25,15 @@ class IPFSClient:
             str: IPFS hash.
         """
         return self.client.add_bytes(uuid_aware_json_encode(data))
+
+    def get_json(self, hsh: str) -> dict[str, Any]:
+        """
+        Downloads a JSON object from IPFS and returns it.
+
+        Args:
+            hsh (str): IPFS hash.
+
+        Returns:
+            dict[str, Any]: JSON data.
+        """
+        return self.client.get_json(hsh)

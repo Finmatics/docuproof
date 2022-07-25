@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional
 
 
@@ -35,9 +36,11 @@ def get_env_bool(key: str, default: bool = False) -> bool:
 
 
 class Config:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
     DATABASE_CONFIG = {
         "connections": {
-            "default": get_env_str("DATABASE_URL", "sqlite://./sqlite.db"),
+            "default": get_env_str("DATABASE_URL", f"sqlite://{BASE_DIR}/sqlite.db"),
         },
         "apps": {
             "models": {
@@ -51,3 +54,7 @@ class Config:
 
     BATCH_TIME = get_env_int("BATCH_TIME", 1)
     BATCH_TIME_UNIT = get_env_str("BATCH_TIME_UNIT", "hours")
+
+    CONTRACT_ADDRESS = get_env_str("CONTRACT_ADDRESS")
+    FROM_WALLET_ADDRESS = get_env_str("FROM_WALLET_ADDRESS")
+    BLOCKCHAIN_PROVIDER_URL = get_env_str("BLOCKCHAIN_PROVIDER_URL", "http://127.0.0.1:7545")

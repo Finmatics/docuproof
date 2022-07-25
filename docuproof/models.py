@@ -1,5 +1,6 @@
-from tortoise import Model, fields
+from tortoise import Model, fields, transactions
 
+from docuproof.blockchain import DocuProofContract
 from docuproof.ipfs import IPFSClient
 from docuproof.utils import get_batch_threshold_dt
 
@@ -28,11 +29,15 @@ class Batch(TimestampMixin, Model):
         return batch
 
     async def upload(self) -> None:
-        files = await self.files.all()
+        files = self.files.all()
         files_values = await files.values("uuid", "sha256")
-        client = IPFSClient()
-        ipfs_hash = client.upload_json(files_values)
-        client.close()
+        files_uuids = await files.values_list("uuid", flat=True)
+        ipfs_hash = IPFSClient().upload_json(files_values)
+
+        contract = DocuProofContract()
+        contract.add_files([str(uuid) for uuid in files_uuids], ipfs_hash)
 
         # Death smiles at us all. All a man can do is smile back.
-        await self.delete()
+        async with transactions.in_transaction():
+            await files.delete()
+            await self.delete()

@@ -7,7 +7,9 @@ from sanic.response import HTTPResponse, json
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
 
-from docuproof.exceptions import HttpBadRequest
+from docuproof.blockchain import DocuProofContract
+from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
+from docuproof.ipfs import IPFSClient
 from docuproof.models import Batch, File
 
 bp = Blueprint("api", url_prefix="/api", version=1)
@@ -51,15 +53,26 @@ class SaveHashView(HTTPMethodView):
 class ValidateView(HTTPMethodView):
     @validate(json=InputData)
     async def post(self, request: Request, body: InputData) -> HTTPResponse:
-        if file := await File.filter(uuid=body.uuid).first():
-            if file.sha256 == body.sha256:
+        def compare_hashes_and_create_response(a: str, b: str) -> HTTPResponse:
+            if a == b:
                 return json({"message": "Hash is valid", "status": 200})
             else:
                 return json({"message": "Hash is invalid", "status": 200})
 
-        # Validate in blockchain if not found locally
+        if file := await File.filter(uuid=body.uuid).first():
+            return compare_hashes_and_create_response(file.sha256, body.sha256)
 
-        return json({"message": "Hash validated successfully", "status": 200})
+        # Validate in blockchain if not found locally
+        ipfs_hash = DocuProofContract().get_ipfs_hash(body.uuid)
+        if ipfs_hash:
+            data = IPFSClient().get_json(ipfs_hash)
+            for item in data:
+                if item["uuid"] == body.uuid:
+                    return compare_hashes_and_create_response(item["sha256"], body.sha256)
+
+            raise HttpInternalServerError("UUID not found in IPFS object")
+
+        raise Http404
 
 
 bp.add_route(SaveHashView.as_view(), "/save")
