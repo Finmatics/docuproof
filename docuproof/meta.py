@@ -7,7 +7,7 @@ class SingletonMeta(type):
     Thread-safe implementation of Singleton.
     """
 
-    _instances = {}
+    _instances: dict = {}
     _lock: Lock = Lock()
 
     def __call__(cls, *args: Any, **kwargs: Any) -> None:

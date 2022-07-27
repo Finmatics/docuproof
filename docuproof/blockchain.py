@@ -20,7 +20,7 @@ class DocuProofContract(metaclass=SingletonMeta):
         url = f"https://api.etherscan.io/api?module=contract&action=getabi&address={Config.CONTRACT_ADDRESS}&format=raw"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
-                return response.text(encoding="utf-8")
+                return await response.text(encoding="utf-8")
 
     async def connect(self) -> None:
         self.web3 = Web3(Web3.HTTPProvider(Config.BLOCKCHAIN_PROVIDER_URL))

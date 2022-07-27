@@ -1,4 +1,5 @@
 from tortoise import Model, fields, transactions
+from tortoise.fields.relational import ForeignKeyFieldInstance, ReverseRelation
 
 from docuproof.blockchain import DocuProofContract
 from docuproof.ipfs import IPFSClient
@@ -10,16 +11,10 @@ class TimestampMixin:
     updated_at = fields.DatetimeField(auto_now=True)
 
 
-class File(TimestampMixin, Model):
-    id = fields.BigIntField(pk=True)
-    uuid = fields.UUIDField()
-    sha256 = fields.CharField(max_length=64)
-
-    batch = fields.ForeignKeyField("models.Batch", related_name="files", on_delete=fields.RESTRICT)
-
-
 class Batch(TimestampMixin, Model):
     id = fields.BigIntField(pk=True)
+
+    files: ReverseRelation
 
     @staticmethod
     async def get_current_batch() -> "Batch":
@@ -41,3 +36,13 @@ class Batch(TimestampMixin, Model):
         async with transactions.in_transaction():
             await files.delete()
             await self.delete()
+
+
+class File(TimestampMixin, Model):
+    id = fields.BigIntField(pk=True)
+    uuid = fields.UUIDField()
+    sha256 = fields.CharField(max_length=64)
+
+    batch: ForeignKeyFieldInstance[Batch] = fields.ForeignKeyField(
+        "models.Batch", related_name="files", on_delete=fields.RESTRICT
+    )
