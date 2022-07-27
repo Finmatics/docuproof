@@ -65,10 +65,10 @@ jobs:
           python-version: "3.9"
 
       - name: Install bandit
-        run: pip install bandit
+        run: pip install bandit[toml]
 
       - name: Run bandit
-        run: bandit . -r
+        run: bandit . -r -c "pyproject.toml"
 
   isort:
     name: Sorting

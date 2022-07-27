@@ -16,6 +16,7 @@ aiohttp = "^3.8.1"
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
 black = "^22.6.0"
+bandit = {extras = ["toml"], version = "^1.7.4"}
 flake8 = "^4.0.1"
 flake8-annotations = "^2.9.0"
 mypy = "^0.961"
@@ -32,6 +33,10 @@ ignore_missing_imports = true
 
 [tool.isort]
 profile = "black"
+
+[tool.bandit]
+exclude_dirs = ["venv"]
+skips = ["B101"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
