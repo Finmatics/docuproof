@@ -205,6 +205,17 @@ python-versions = "*"
 test = ["flake8 (==3.7.8)", "hypothesis (==3.55.3)"]
 
 [[package]]
+name = "coverage"
+version = "6.4.2"
+description = "Code coverage measurement for Python"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+toml = ["tomli"]
+
+[[package]]
 name = "crytic-compile"
 version = "0.2.3"
 description = "Util to facilitate smart contracts compilation."
@@ -1285,7 +1296,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "cb92a95bc836693f8e042b304d22254fe37c969bda6a6818300a969227ed62f4"
+content-hash = "0c73df3ba2aa9d8a809eb1f787bdc26179eba212c25c5ca9eeb32c87e5b92330"
 
 [metadata.files]
 aiofiles = []
@@ -1344,6 +1355,7 @@ commonmark = [
     {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
     {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
 ]
+coverage = []
 crytic-compile = []
 cytoolz = []
 eth-abi = []
