@@ -2,6 +2,7 @@ import json
 from functools import cached_property
 
 import aiohttp
+from eth_account.datastructures import SignedTransaction
 from web3 import Web3
 
 from docuproof.config import Config
@@ -18,7 +19,7 @@ class DocuProofContract(metaclass=SingletonMeta):
                 return json.dumps(data["abi"])
 
         url = f"https://api.etherscan.io/api?module=contract&action=getabi&address={Config.CONTRACT_ADDRESS}&format=raw"
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=20)) as session:
             async with session.get(url) as response:
                 return await response.text(encoding="utf-8")
 
@@ -30,6 +31,18 @@ class DocuProofContract(metaclass=SingletonMeta):
 
         abi = await self.abi
         self.contract = self.web3.eth.contract(address=Config.CONTRACT_ADDRESS, abi=abi)
+
+    def _sign_transaction(self, txn: dict) -> SignedTransaction:
+        """
+        Signs a transaction with the configured private key.
+
+        Args:
+            txn (dict): Transaction to sign.
+
+        Returns:
+            dict: Signed transaction.
+        """
+        return self.web3.eth.account.sign_transaction(txn, private_key=Config.FROM_WALLET_PRIVATE_KEY)
 
     def add_file(self, uuid: str, ipfs_hash: str) -> str:
         """
@@ -43,9 +56,13 @@ class DocuProofContract(metaclass=SingletonMeta):
         Returns:
             str: Transaction hash
         """
-        return self.contract.functions.addFile(uuid, ipfs_hash).transact({"from": Config.FROM_WALLET_ADDRESS})
+        func_txn = self.contract.functions.addFile(uuid, ipfs_hash).build_transaction(
+            {"from": Config.FROM_WALLET_ADDRESS}
+        )
+        signed_txn = self._sign_transaction(func_txn)
+        return self.web3.eth.send_raw_transaction(signed_txn.rawTransaction).hex()
 
-    def add_files(self, uuids: list[str], ipfs_hash: str) -> None:
+    def add_files(self, uuids: list[str], ipfs_hash: str) -> str:
         """
         Executes the contract's addFiles function.
         Gas is estimated and the transaction is sent.
@@ -57,7 +74,11 @@ class DocuProofContract(metaclass=SingletonMeta):
         Returns:
             str: Transaction hash
         """
-        return self.contract.functions.addFiles(uuids, ipfs_hash).transact({"from": Config.FROM_WALLET_ADDRESS})
+        func_txn = self.contract.functions.addFiles(uuids, ipfs_hash).build_transaction(
+            {"from": Config.FROM_WALLET_ADDRESS}
+        )
+        signed_txn = self._sign_transaction(func_txn)
+        return self.web3.eth.send_raw_transaction(signed_txn.rawTransaction).hex()
 
     def get_ipfs_hash(self, uuid: str) -> None:
         """

@@ -34,7 +34,16 @@ async def before_start(app: Sanic) -> None:
 @application.after_server_start
 async def after_start(app: Sanic) -> None:
     # Initialize IPFS connection as soon as possible, but after the server is loaded
-    IPFSClient()
+    ipfs_addr = Config.IPFS_API_ENDPOINT if Config.IPFS_API_ENDPOINT else None
+    ipfs_auth = (
+        (Config.IPFS_ENDPOINT_USERNAME, Config.IPFS_ENDPOINT_PASSWORD)
+        if Config.IPFS_ENDPOINT_USERNAME and Config.IPFS_ENDPOINT_PASSWORD
+        else None
+    )
+    IPFSClient().connect(
+        addr=ipfs_addr,
+        auth=ipfs_auth,
+    )
 
 
 @application.after_server_stop

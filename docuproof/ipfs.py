@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import ipfshttpclient as ipfs
 
@@ -7,9 +7,14 @@ from docuproof.meta import SingletonMeta
 
 
 class IPFSClient(metaclass=SingletonMeta):
-    def __new__(cls) -> "IPFSClient":
-        cls.client = ipfs.connect(session=True)
-        return super().__new__(cls)
+    def connect(self, addr: Optional[str] = None, auth: Optional[tuple[str, str]] = None) -> None:
+        connection_kwargs: dict[str, Any] = {}
+        if addr:
+            connection_kwargs["addr"] = addr
+        if auth:
+            connection_kwargs["auth"] = auth
+
+        self.client = ipfs.connect(session=True, **connection_kwargs)
 
     def close(self) -> None:
         self.client.close()
