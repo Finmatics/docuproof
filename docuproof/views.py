@@ -8,6 +8,7 @@ from sanic.views import HTTPMethodView
 from sanic_ext import validate
 
 from docuproof.blockchain import DocuProofContract
+from docuproof.decorators import token_required
 from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
 from docuproof.ipfs import IPFSClient
 from docuproof.models import Batch, File
@@ -30,6 +31,7 @@ class SaveHashView(HTTPMethodView):
         if not input_data.sha256:
             raise HttpBadRequest("Missing field `sha256`")
 
+    @token_required
     async def post(self, request: Request) -> HTTPResponse:
         def create_file(batch: Batch, uuid: str, sha256: str) -> File:
             return File.create(batch=batch, uuid=uuid, sha256=sha256)

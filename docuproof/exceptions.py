@@ -7,6 +7,12 @@ class Http404(SanicException):
     quiet = True
 
 
+class HttpUnauthorized(SanicException):
+    status_code = 401
+    message = "Unauthorized"
+    quiet = True
+
+
 class HttpBadRequest(SanicException):
     status_code = 400
     message = "Bad request"

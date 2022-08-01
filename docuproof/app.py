@@ -4,11 +4,11 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from tortoise.contrib.sanic import register_tortoise
 
-from docuproof.api.views import bp as APIBlueprint
 from docuproof.blockchain import DocuProofContract
 from docuproof.config import Config
 from docuproof.ipfs import IPFSClient
 from docuproof.tasks import TASK_LIST
+from docuproof.views import bp as APIBlueprint
 
 load_dotenv()
 

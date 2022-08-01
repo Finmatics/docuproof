@@ -55,6 +55,8 @@ class Config:
     BATCH_TIME = get_env_int("BATCH_TIME", 1)
     BATCH_TIME_UNIT = get_env_str("BATCH_TIME_UNIT", "hours")
 
+    PRIVATE_ENDPOINTS_TOKEN = get_env_str("PRIVATE_ENDPOINTS_TOKEN")
+
     CONTRACT_ADDRESS = get_env_str("CONTRACT_ADDRESS")
     FROM_WALLET_ADDRESS = get_env_str("FROM_WALLET_ADDRESS")
     BLOCKCHAIN_PROVIDER_URL = get_env_str("BLOCKCHAIN_PROVIDER_URL", "http://127.0.0.1:7545")
