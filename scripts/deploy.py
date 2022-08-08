@@ -1,6 +1,7 @@
-from brownie import DocuProof, accounts
+from brownie import DocuProof, accounts, config
 
 
 def main() -> None:
-    acc = accounts[0]
-    DocuProof.deploy({"from": acc})
+    acc = accounts.add(config["wallets"]["from_key"])
+    contract = DocuProof.deploy({"from": acc})
+    print(f"Contract deployed to {contract.address}")

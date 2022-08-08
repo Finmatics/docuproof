@@ -14,5 +14,8 @@ compiler:
         remappings:
             - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.0"
 
+wallets:
+    from_key: ${FROM_WALLET_PRIVATE_KEY}
+
 networks:
     default: ganache-gui
