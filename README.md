@@ -25,5 +25,5 @@ $ brownie networks add Live ganache-gui host=http://127.0.0.1:7545 chainid=5777 
 
 To run the complete test suite:
 ```
-$ brownie test
+$ pytest
 ```

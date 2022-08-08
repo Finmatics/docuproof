@@ -30,6 +30,9 @@ class Batch(TimestampMixin, Model):
         ipfs_hash = IPFSClient().upload_json(files_values)
 
         contract = DocuProofContract()
+        # TODO: Could use a lock on the files table to prevent concurrent adding
+        # While the files are locked, check whether the files are already added to the blockchain
+        # Pop the ones that are (if any) and add the rest
         contract.add_files([str(uuid) for uuid in files_uuids], ipfs_hash)
 
         # Death smiles at us all. All a man can do is smile back.

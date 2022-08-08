@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from jinja2 import Environment, FileSystemLoader
+
 
 def get_env_str(key: str, default: Optional[str] = None) -> Optional[str]:
     return os.environ.get(key, default)
@@ -37,6 +39,14 @@ def get_env_bool(key: str, default: bool = False) -> bool:
 
 class Config:
     BASE_DIR = Path(__file__).resolve().parent.parent
+
+    SHOW_FRONTEND = get_env_bool("SHOW_FRONTEND", False)
+
+    TEMPLATE_ENVIRONMENT = Environment(
+        loader=FileSystemLoader(str(BASE_DIR / "docuproof" / "templates")),
+        autoescape=True,
+        enable_async=True,
+    )
 
     DATABASE_CONFIG = {
         "connections": {

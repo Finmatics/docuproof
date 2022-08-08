@@ -582,6 +582,20 @@ colors = ["colorama (>=0.4.3,<0.5.0)"]
 plugins = ["setuptools"]
 
 [[package]]
+name = "jinja2"
+version = "3.1.2"
+description = "A very fast and expressive template engine."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+MarkupSafe = ">=2.0"
+
+[package.extras]
+i18n = ["Babel (>=2.7)"]
+
+[[package]]
 name = "jsonschema"
 version = "4.7.2"
 description = "An implementation of JSON Schema validation for Python"
@@ -607,6 +621,14 @@ python-versions = "*"
 
 [package.extras]
 test = ["pytest"]
+
+[[package]]
+name = "markupsafe"
+version = "2.1.1"
+description = "Safely add untrusted strings to HTML/XML markup."
+category = "main"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "mccabe"
@@ -1025,7 +1047,7 @@ test = ["pytest (>=6.2.5,<7)", "tox (>=2.9.1,<3)", "hypothesis (==5.19.0)"]
 
 [[package]]
 name = "sanic"
-version = "22.6.0"
+version = "22.6.1"
 description = "A web server and web framework that's written to go fast. Build fast. Run fast."
 category = "main"
 optional = false
@@ -1042,7 +1064,7 @@ uvloop = {version = ">=0.5.3", markers = "sys_platform != \"win32\" and implemen
 websockets = ">=10.0"
 
 [package.extras]
-all = ["pytest-sugar", "sanic-testing (>=22.3.0)", "towncrier", "pytest-benchmark", "slotscheck (>=0.8.0,<1)", "pytest-cov", "pygments", "bandit", "isort (>=5.0.0)", "enum-tools", "mypy (>=0.901,<0.910)", "docutils", "black", "mistune (<2.0.0)", "pytest-sanic", "gunicorn (==20.0.4)", "cryptography", "chardet (>=3.0.0,<4.0.0)", "sphinx (>=2.1.2)", "sphinx-rtd-theme (>=0.4.3)", "beautifulsoup4", "uvicorn (<0.15.0)", "m2r2", "pytest (==6.2.5)", "tox", "coverage (==5.3)", "flake8", "types-ujson"]
+all = ["isort (>=5.0.0)", "pytest-sugar", "pytest-benchmark", "docutils", "towncrier", "cryptography", "mistune (<2.0.0)", "slotscheck (>=0.8.0,<1)", "flake8", "chardet (>=3.0.0,<4.0.0)", "m2r2", "bandit", "beautifulsoup4", "sanic-testing (>=22.3.0)", "mypy (>=0.901,<0.910)", "sphinx (>=2.1.2)", "tox", "uvicorn (<0.15.0)", "pygments", "black", "coverage (==5.3)", "pytest (==6.2.5)", "pytest-sanic", "pytest-cov", "enum-tools", "gunicorn (==20.0.4)", "sphinx-rtd-theme (>=0.4.3)", "types-ujson"]
 dev = ["sanic-testing (>=22.3.0)", "pytest (==6.2.5)", "coverage (==5.3)", "gunicorn (==20.0.4)", "pytest-cov", "beautifulsoup4", "pytest-sanic", "pytest-sugar", "pytest-benchmark", "chardet (>=3.0.0,<4.0.0)", "flake8", "black", "isort (>=5.0.0)", "bandit", "mypy (>=0.901,<0.910)", "docutils", "pygments", "uvicorn (<0.15.0)", "slotscheck (>=0.8.0,<1)", "cryptography", "tox", "towncrier", "types-ujson"]
 docs = ["sphinx (>=2.1.2)", "sphinx-rtd-theme (>=0.4.3)", "docutils", "pygments", "m2r2", "enum-tools", "mistune (<2.0.0)"]
 ext = ["sanic-ext"]
@@ -1296,7 +1318,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "0c73df3ba2aa9d8a809eb1f787bdc26179eba212c25c5ca9eeb32c87e5b92330"
+content-hash = "2eed6f70cfaa2ab43ceac6742f46811f753e659d4fe9fa2d9449bc8901385261"
 
 [metadata.files]
 aiofiles = []
@@ -1403,8 +1425,10 @@ isort = [
     {file = "isort-5.10.1-py3-none-any.whl", hash = "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7"},
     {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
 ]
+jinja2 = []
 jsonschema = []
 lru-dict = []
+markupsafe = []
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
