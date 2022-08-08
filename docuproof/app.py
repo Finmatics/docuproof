@@ -9,6 +9,7 @@ from docuproof.blockchain import DocuProofContract
 from docuproof.config import Config
 from docuproof.ipfs import IPFSClient
 from docuproof.tasks import TASK_LIST
+from docuproof.utils import convert_url_to_multiaddr
 from docuproof.views import bp as APIBlueprint
 
 load_dotenv()
@@ -48,7 +49,7 @@ async def before_start(app: Sanic) -> None:
 @application.after_server_start
 async def after_start(app: Sanic) -> None:
     # Initialize IPFS connection as soon as possible, but after the server is loaded
-    ipfs_addr = Config.IPFS_API_ENDPOINT if Config.IPFS_API_ENDPOINT else None
+    ipfs_addr = convert_url_to_multiaddr(Config.IPFS_API_ENDPOINT) if Config.IPFS_API_ENDPOINT else None
     ipfs_auth = (
         (Config.IPFS_ENDPOINT_USERNAME, Config.IPFS_ENDPOINT_PASSWORD)
         if Config.IPFS_ENDPOINT_USERNAME and Config.IPFS_ENDPOINT_PASSWORD

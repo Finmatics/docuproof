@@ -69,7 +69,7 @@ class ValidateView(HTTPMethodView):
         if ipfs_hash:
             data = IPFSClient().get_json(ipfs_hash)
             for item in data:
-                if item["uuid"] == body.uuid:
+                if item["uuid"] == body.uuid.replace("-", ""):
                     return compare_hashes_and_create_response(item["sha256"], body.sha256)
 
             raise HttpInternalServerError("UUID not found in IPFS object")

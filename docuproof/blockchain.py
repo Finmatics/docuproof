@@ -4,6 +4,7 @@ from functools import cached_property
 import aiohttp
 from eth_account.datastructures import SignedTransaction
 from web3 import Web3
+from web3.middleware import geth_poa_middleware
 
 from docuproof.config import Config
 from docuproof.meta import SingletonMeta
@@ -25,12 +26,20 @@ class DocuProofContract(metaclass=SingletonMeta):
 
     async def connect(self) -> None:
         self.web3 = Web3(Web3.HTTPProvider(Config.BLOCKCHAIN_PROVIDER_URL))
+        if Config.POA_BLOCKCHAIN:
+            self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         if not self.web3.isConnected():
             raise Exception("Could not connect to Ethereum node")
 
         abi = await self.abi
         self.contract = self.web3.eth.contract(address=Config.CONTRACT_ADDRESS, abi=abi)
+
+    def _get_nonce(self) -> int:
+        """
+        Returns the nonce of the configured wallet.
+        """
+        return self.web3.eth.get_transaction_count(Config.FROM_WALLET_ADDRESS)
 
     def _sign_transaction(self, txn: dict) -> SignedTransaction:
         """
@@ -57,7 +66,10 @@ class DocuProofContract(metaclass=SingletonMeta):
             str: Transaction hash
         """
         func_txn = self.contract.functions.addFile(uuid, ipfs_hash).build_transaction(
-            {"from": Config.FROM_WALLET_ADDRESS}
+            {
+                "from": Config.FROM_WALLET_ADDRESS,
+                "nonce": self._get_nonce(),
+            }
         )
         signed_txn = self._sign_transaction(func_txn)
         return self.web3.eth.send_raw_transaction(signed_txn.rawTransaction).hex()
@@ -75,7 +87,10 @@ class DocuProofContract(metaclass=SingletonMeta):
             str: Transaction hash
         """
         func_txn = self.contract.functions.addFiles(uuids, ipfs_hash).build_transaction(
-            {"from": Config.FROM_WALLET_ADDRESS}
+            {
+                "from": Config.FROM_WALLET_ADDRESS,
+                "nonce": self._get_nonce(),
+            }
         )
         signed_txn = self._sign_transaction(func_txn)
         return self.web3.eth.send_raw_transaction(signed_txn.rawTransaction).hex()
