@@ -42,6 +42,8 @@ class Config:
 
     SHOW_FRONTEND = get_env_bool("SHOW_FRONTEND", False)
 
+    RUN_BACKGROUND_TASKS = get_env_bool("RUN_BACKGROUND_TASKS", True)
+
     TEMPLATE_ENVIRONMENT = Environment(
         loader=FileSystemLoader(str(BASE_DIR / "docuproof" / "templates")),
         autoescape=True,

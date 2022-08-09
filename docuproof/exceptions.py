@@ -22,3 +22,7 @@ class HttpBadRequest(SanicException):
 class HttpInternalServerError(SanicException):
     status_code = 500
     message = "Internal server error"
+
+
+class ABINotFound(Exception):
+    pass

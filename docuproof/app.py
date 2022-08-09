@@ -18,8 +18,9 @@ application = Sanic("docuproof")
 
 application.blueprint(APIBlueprint)
 
-for task_func in TASK_LIST:
-    application.add_task(task_func)
+if Config.RUN_BACKGROUND_TASKS:
+    for task_func in TASK_LIST:
+        application.add_task(task_func)
 
 register_tortoise(application, config=Config.DATABASE_CONFIG, generate_schemas=True)
 

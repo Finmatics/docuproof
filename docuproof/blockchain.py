@@ -6,6 +6,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from docuproof.config import Config
+from docuproof.exceptions import ABINotFound
 from docuproof.meta import SingletonMeta
 
 
@@ -17,6 +18,8 @@ class DocuProofContract(metaclass=SingletonMeta):
             with path.open(encoding="utf-8") as f:
                 data = json.load(f)
                 return json.dumps(data["abi"])
+
+        raise ABINotFound("Could not find contract's ABI")
 
     async def connect(self) -> None:
         self.web3 = Web3(Web3.HTTPProvider(Config.BLOCKCHAIN_PROVIDER_URL))
