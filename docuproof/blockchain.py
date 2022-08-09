@@ -1,7 +1,6 @@
 import json
 from functools import cached_property
 
-import aiohttp
 from eth_account.datastructures import SignedTransaction
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
@@ -18,11 +17,6 @@ class DocuProofContract(metaclass=SingletonMeta):
             with path.open(encoding="utf-8") as f:
                 data = json.load(f)
                 return json.dumps(data["abi"])
-
-        url = f"https://api.etherscan.io/api?module=contract&action=getabi&address={Config.CONTRACT_ADDRESS}&format=raw"
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=20)) as session:
-            async with session.get(url) as response:
-                return await response.text(encoding="utf-8")
 
     async def connect(self) -> None:
         self.web3 = Web3(Web3.HTTPProvider(Config.BLOCKCHAIN_PROVIDER_URL))

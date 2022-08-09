@@ -12,7 +12,6 @@ tortoise-orm = "^0.19.2"
 Jinja2 = "^3.1.2"
 web3 = {version = "6.0.0b3", allow-prereleases = true}
 ipfshttpclient = {version = "0.8.0a2", allow-prereleases = true}
-aiohttp = "^3.8.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
