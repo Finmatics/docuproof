@@ -47,7 +47,8 @@
             <input type="text" class="form-control" id="form-hash">
             <label for="form-hash">SHA256 Hash</label>
         </div>
-        <button class="w-100 btn btn-lg btn-primary" type="submit" id="add-button">Add To Blockchain</button>
+        <button class="w-100 btn btn-lg btn-primary mb-2" type="submit" id="add-button">Add To Blockchain</button>
+        <button class="w-100 btn btn-lg btn-secondary" type="submit" id="validate-button">Validate Hash</button>
         <p class="mt-5 mb-3 text-muted">© 2022 - now</p>
     </main>
     <script>
@@ -56,26 +57,37 @@
             messageContainer.innerHTML = msg;
         }
 
+        function sendJSON(url, data) {
+            const request = new XMLHttpRequest();
+            request.open("POST", url, true);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.setRequestHeader("Authorization", "Bearer {{ token }}")
+            request.onreadystatechange = function() {
+                displayMessage(JSON.parse(request.responseText)['message']);
+            };
+            request.send(data);
+        }
+
+        function readFormAndSend(url) {
+            let uuidValue = document.getElementById("form-uuid").value;
+            let hashValue = document.getElementById("form-hash").value;
+            const data = JSON.stringify({"uuid": uuidValue, "sha256": hashValue});
+            sendJSON(url, data);
+        }
+
         window.onload = function() {
             let addButton = document.getElementById("add-button");
+            let validateButton = document.getElementById("validate-button");
+
             addButton.onclick = function() {
-                let uuidInput = document.getElementById("form-uuid");
-                let hashInput = document.getElementById("form-hash");
                 const url = "/v1/api/save/";
-                const data = JSON.stringify({"uuid": uuidInput.value, "sha256": hashInput.value});
-                const request = new XMLHttpRequest();
-                request.open("POST", url, true);
-                request.setRequestHeader("Content-Type", "application/json");
-                request.setRequestHeader("Authorization", "Bearer {{ token }}")
-                request.onreadystatechange = function() {
-                    if (request.readyState == 4 && request.status == 200) {
-                        displayMessage("Hash queued for blockchain upload");
-                    } else {
-                        displayMessage(request.responseText);
-                    }
-                };
-                request.send(data);
-            }
+                readFormAndSend(url);
+            };
+
+            validateButton.onclick = function() {
+                const url = "/v1/api/validate/";
+                readFormAndSend(url);
+            };
         }
     </script>
 </body>
