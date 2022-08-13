@@ -12,7 +12,7 @@ from docuproof.meta import SingletonMeta
 
 class DocuProofContract(metaclass=SingletonMeta):
     @cached_property
-    async def abi(self) -> str:
+    def abi(self) -> str:
         path = Config.BASE_DIR / "build" / "contracts" / "DocuProof.json"
         if path.exists():
             with path.open(encoding="utf-8") as f:
@@ -29,8 +29,7 @@ class DocuProofContract(metaclass=SingletonMeta):
         if not self.web3.isConnected():
             raise Exception("Could not connect to Ethereum node")
 
-        abi = await self.abi
-        self.contract = self.web3.eth.contract(address=Config.CONTRACT_ADDRESS, abi=abi)
+        self.contract = self.web3.eth.contract(address=Config.CONTRACT_ADDRESS, abi=self.abi)
 
     def _get_nonce(self) -> int:
         """

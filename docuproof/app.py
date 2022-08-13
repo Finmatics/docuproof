@@ -1,8 +1,5 @@
 from dotenv import load_dotenv
 from sanic import Sanic
-from sanic.request import Request
-from sanic.response import HTTPResponse, json
-from sanic_ext import render
 from tortoise.contrib.sanic import register_tortoise
 
 from docuproof.blockchain import DocuProofContract
@@ -11,34 +8,23 @@ from docuproof.ipfs import IPFSClient
 from docuproof.tasks import TASK_LIST
 from docuproof.utils import convert_url_to_multiaddr
 from docuproof.views import bp as APIBlueprint
+from docuproof.views import health, index
 
 load_dotenv()
 
 application = Sanic("docuproof")
 
 application.blueprint(APIBlueprint)
+application.add_route(health, "/health")
+
+if Config.SHOW_FRONTEND:
+    application.add_route(index, "/")
 
 if Config.RUN_BACKGROUND_TASKS:
     for task_func in TASK_LIST:
         application.add_task(task_func)
 
 register_tortoise(application, config=Config.DATABASE_CONFIG, generate_schemas=True)
-
-
-@application.route("/health")
-async def health(request: Request) -> HTTPResponse:
-    return json({"status": "ok"})
-
-
-if Config.SHOW_FRONTEND:
-
-    @application.route("/")
-    async def index(request: Request) -> HTTPResponse:
-        return await render(
-            "index.html",
-            environment=Config.TEMPLATE_ENVIRONMENT,
-            context={"token": Config.PRIVATE_ENDPOINTS_TOKEN},
-        )
 
 
 @application.before_server_start

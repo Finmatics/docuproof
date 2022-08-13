@@ -5,13 +5,27 @@ from sanic import Blueprint
 from sanic.request import Request
 from sanic.response import HTTPResponse, json
 from sanic.views import HTTPMethodView
-from sanic_ext import validate
+from sanic_ext import render, validate
 
 from docuproof.blockchain import DocuProofContract
+from docuproof.config import Config
 from docuproof.decorators import token_required
 from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
 from docuproof.ipfs import IPFSClient
 from docuproof.models import Batch, File
+
+
+async def health(request: Request) -> HTTPResponse:
+    return json({"status": "ok"})
+
+
+async def index(request: Request) -> HTTPResponse:
+    return await render(
+        "index.html",
+        environment=Config.TEMPLATE_ENVIRONMENT,
+        context={"token": Config.PRIVATE_ENDPOINTS_TOKEN},
+    )
+
 
 bp = Blueprint("api", url_prefix="/api", version=1)
 
@@ -24,12 +38,15 @@ class InputData:
 
 class SaveHashView(HTTPMethodView):
     def _validate(self, data: dict[str, Any]) -> None:
-        input_data = InputData(**data)
-        if not input_data.uuid:
-            raise HttpBadRequest("Missing field `uuid`")
+        try:
+            input_data = InputData(**data)
+            if not input_data.uuid:
+                raise HttpBadRequest("Empty value for field `uuid`")
 
-        if not input_data.sha256:
-            raise HttpBadRequest("Missing field `sha256`")
+            if not input_data.sha256:
+                raise HttpBadRequest("Empty value for field `sha256`")
+        except TypeError:
+            raise HttpBadRequest("Invalid input data")
 
     @token_required
     async def post(self, request: Request) -> HTTPResponse:
