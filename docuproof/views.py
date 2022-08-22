@@ -79,7 +79,10 @@ class ValidateView(HTTPMethodView):
                 return json({"message": "Hash is invalid", "status": 200})
 
         if file := await File.filter(uuid=body.uuid).first():
-            return compare_hashes_and_create_response(file.sha256, body.sha256)
+            if file.sha256 == body.sha256:
+                return json({"message": "Hash is valid (in local database)", "status": 200})
+            else:
+                return json({"message": "Hash is invalid (in local database)", "status": 200})
 
         # Validate in blockchain if not found locally
         ipfs_hash = DocuProofContract().get_ipfs_hash(body.uuid)
@@ -87,7 +90,10 @@ class ValidateView(HTTPMethodView):
             data = IPFSClient().get_json(ipfs_hash)
             for item in data:
                 if item["uuid"] == body.uuid.replace("-", ""):
-                    return compare_hashes_and_create_response(item["sha256"], body.sha256)
+                    if item["sha256"] == body.sha256:
+                        return json({"message": "Hash is valid (on blockchain)", "status": 200})
+                    else:
+                        return json({"message": "Hash is invalid (on blockchain)", "status": 200})
 
             raise HttpInternalServerError("UUID not found in IPFS object")
 
