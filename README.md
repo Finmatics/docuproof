@@ -1,5 +1,19 @@
 # DocuProof
 
+## Installation
+
+* Install Brownie
+
+```
+$ python3 -m pip install --user pipx
+$ pipx install eth-brownie
+```
+
+* Install dependencies
+```
+$ python3 -m pip install -r requirements.txt
+```
+
 ## Usage
 
 ### Compiling contracts
