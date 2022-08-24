@@ -3,7 +3,6 @@
 ## Installation
 
 * Install Brownie
-
 ```
 $ python3 -m pip install --user pipx
 $ pipx install eth-brownie
@@ -13,6 +12,15 @@ $ pipx install eth-brownie
 ```
 $ python3 -m pip install -r requirements.txt
 ```
+
+* Connect with IPFS and Ethereum node
+
+  1. (Recommended) Use [Infura](https://infura.io/) to obtain credentials for the IPFS and Ethereum endpoints and add them to `.env` file using the template
+  2. Run both nodes locally - you can do so with Docker:
+   ```
+   $ docker run -d -p 7545:8545 trufflesuite/ganache-cli:latest
+   $ docker run -d -p 4001:4001 -p 8080:8080 -p 5001:5001 ipfs/go-ipfs:latest
+   ```
 
 ## Usage
 
@@ -33,6 +41,14 @@ $ brownie console
 In order to use the local blockchain managed by Ganache, we need to add its network to Brownie:
 ```
 $ brownie networks add Live ganache-gui host=http://127.0.0.1:7545 chainid=5777 name="Ganache GUI"
+```
+
+### Running the application
+
+In order to run the application using the built-in Sanic server:
+
+```
+$ python3 -m sanic docuproof.app:application
 ```
 
 ## Deployment
