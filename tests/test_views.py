@@ -7,7 +7,7 @@ from tortoise.contrib.sanic import register_tortoise
 
 from docuproof.config import Config
 from docuproof.views import bp as APIBlueprint
-from docuproof.views import health, index
+from docuproof.views import health
 
 
 @pytest.fixture
@@ -17,18 +17,11 @@ def app() -> Sanic:
 
     app = Sanic("docuproof-test")
     app.blueprint(APIBlueprint)
-    app.add_route(index, "/")
     app.add_route(health, "/health")
 
     register_tortoise(app, config=config, generate_schemas=True)
 
     return app
-
-
-async def test_index(app: Sanic) -> None:
-    _, response = await app.asgi_client.get("/")
-    assert response.status == 200
-    assert response.content_type == "text/html; charset=utf-8"
 
 
 async def test_health(app: Sanic) -> None:

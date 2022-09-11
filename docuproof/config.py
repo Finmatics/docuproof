@@ -40,8 +40,6 @@ def get_env_bool(key: str, default: bool = False) -> bool:
 class Config:
     BASE_DIR = Path(__file__).resolve().parent.parent
 
-    SHOW_FRONTEND = get_env_bool("SHOW_FRONTEND", False)
-
     RUN_BACKGROUND_TASKS = get_env_bool("RUN_BACKGROUND_TASKS", True)
 
     TEMPLATE_ENVIRONMENT = Environment(

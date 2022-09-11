@@ -1,96 +1,88 @@
-from dataclasses import dataclass
-from typing import Any
+from io import BytesIO
 
 from sanic import Blueprint
 from sanic.request import Request
-from sanic.response import HTTPResponse, json
+from sanic.response import HTTPResponse, json, raw
 from sanic.views import HTTPMethodView
-from sanic_ext import render, validate
+from tortoise.exceptions import IntegrityError
 
 from docuproof.blockchain import DocuProofContract
-from docuproof.config import Config
 from docuproof.decorators import token_required
 from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
 from docuproof.ipfs import IPFSClient
 from docuproof.models import Batch, File
+from docuproof.utils import get_bytes_hash, get_file_hash, write_pdf_metadata
 
 
 async def health(request: Request) -> HTTPResponse:
     return json({"status": "ok"})
 
 
-async def index(request: Request) -> HTTPResponse:
-    return await render(
-        "index.html",
-        environment=Config.TEMPLATE_ENVIRONMENT,
-        context={"token": Config.PRIVATE_ENDPOINTS_TOKEN},
-    )
-
-
 bp = Blueprint("api", url_prefix="/api", version=1)
 
 
-@dataclass
-class InputData:
-    uuid: str
-    sha256: str
-
-
-class SaveHashView(HTTPMethodView):
-    def _validate(self, data: dict[str, Any]) -> None:
-        try:
-            input_data = InputData(**data)
-            if not input_data.uuid:
-                raise HttpBadRequest("Empty value for field `uuid`")
-
-            if not input_data.sha256:
-                raise HttpBadRequest("Empty value for field `sha256`")
-        except TypeError:
-            raise HttpBadRequest("Invalid input data")
-
+class StoreView(HTTPMethodView):
     @token_required
     async def post(self, request: Request) -> HTTPResponse:
         def create_file(batch: Batch, uuid: str, sha256: str) -> File:
             return File.create(batch=batch, uuid=uuid, sha256=sha256)
 
-        data = request.json
+        form = request.form
+        files = request.files
+        if not form or not files:
+            raise HttpBadRequest("Invalid input data")
+
+        if not (uuid := form.get("uuid", None)):
+            raise HttpBadRequest("Missing field `uuid`")
+
+        if not (file := files.get("file", None)):
+            raise HttpBadRequest("Missing PDF file")
+
         batch = await Batch.get_current_batch()
+        updated_pdf = write_pdf_metadata(
+            file=BytesIO(file.body), metadata={"UUID": str(uuid), "ProofID": str(batch.proof_id)}
+        )
+        sha256 = get_file_hash(updated_pdf)
 
-        if isinstance(data, list):
-            for d in data:
-                self._validate(d)
+        try:
+            await create_file(batch=batch, uuid=uuid, sha256=sha256)
+        except IntegrityError:
+            raise HttpBadRequest("File with this UUID already exists")
 
-            for d in data:
-                await create_file(batch=batch, uuid=d["uuid"], sha256=d["sha256"])
-        else:
-            self._validate(data)
-            await create_file(batch=batch, uuid=data["uuid"], sha256=data["sha256"])
-
-        return json({"message": "Hash saved successfully", "status": 200})
+        return raw(updated_pdf.read(), content_type="application/pdf", headers={"Proof-ID": str(batch.proof_id)})
 
 
 class ValidateView(HTTPMethodView):
-    @validate(json=InputData)
-    async def post(self, request: Request, body: InputData) -> HTTPResponse:
-        def compare_hashes_and_create_response(a: str, b: str) -> HTTPResponse:
-            if a == b:
-                return json({"message": "Hash is valid", "status": 200})
-            else:
-                return json({"message": "Hash is invalid", "status": 200})
+    async def post(self, request: Request) -> HTTPResponse:
+        form = request.form
+        files = request.files
+        if not form or not files:
+            raise HttpBadRequest("Invalid input data")
 
-        if file := await File.filter(uuid=body.uuid).first():
-            if file.sha256 == body.sha256:
+        if not (uuid := form.get("uuid", None)):
+            raise HttpBadRequest("Missing field `uuid`")
+
+        if not (proof_id := form.get("proof_id", None)):
+            raise HttpBadRequest("Missing field `proof_id`")
+
+        if not (file := files.get("file", None)):
+            raise HttpBadRequest("Missing PDF file")
+
+        sha256 = get_bytes_hash(file.body)
+
+        if file_obj := await File.filter(uuid=uuid).first():
+            if file_obj.sha256 == sha256:
                 return json({"message": "Hash is valid (in local database)", "status": 200})
             else:
                 return json({"message": "Hash is invalid (in local database)", "status": 200})
 
         # Validate in blockchain if not found locally
-        ipfs_hash = DocuProofContract().get_ipfs_hash(body.uuid)
+        ipfs_hash = DocuProofContract().get_ipfs_hash(proof_id)
         if ipfs_hash:
             data = IPFSClient().get_json(ipfs_hash)
             for item in data:
-                if item["uuid"] == body.uuid.replace("-", ""):
-                    if item["sha256"] == body.sha256:
+                if item["uuid"] == uuid.replace("-", ""):
+                    if item["sha256"] == sha256:
                         return json({"message": "Hash is valid (on blockchain)", "status": 200})
                     else:
                         return json({"message": "Hash is invalid (on blockchain)", "status": 200})
@@ -100,5 +92,5 @@ class ValidateView(HTTPMethodView):
         raise Http404
 
 
-bp.add_route(SaveHashView.as_view(), "/save")
+bp.add_route(StoreView.as_view(), "/store")
 bp.add_route(ValidateView.as_view(), "/validate")
