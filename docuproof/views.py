@@ -5,6 +5,7 @@ from sanic.request import Request
 from sanic.response import HTTPResponse, json, raw
 from sanic.views import HTTPMethodView
 from tortoise.exceptions import IntegrityError
+from web3.exceptions import ContractLogicError
 
 from docuproof.blockchain import DocuProofContract
 from docuproof.decorators import token_required
@@ -59,6 +60,7 @@ class StoreView(HTTPMethodView):
 
 class ValidateView(HTTPMethodView):
     async def post(self, request: Request) -> HTTPResponse:
+        form = request.form
         files = request.files
         if not files or not (file := files.get("file", None)):
             raise HttpBadRequest("Missing PDF file")
@@ -70,24 +72,28 @@ class ValidateView(HTTPMethodView):
             raise HttpBadRequest("Missing Proof ID in PDF metadata")
         sha256 = get_bytes_hash(file.body)
 
-        if file_obj := await File.filter(uuid=uuid).first():
-            if file_obj.sha256 == sha256:
-                return json({"message": "Hash is valid (in local database)", "status": 200})
-            else:
-                return json({"message": "Hash is invalid (in local database)", "status": 200})
+        if form.get("force_blockchain", None) not in ["True", "true", "1"]:
+            if file_obj := await File.filter(uuid=uuid).first():
+                if file_obj.sha256 == sha256:
+                    return json({"message": "Hash is valid (in local database)", "status": 200})
+                else:
+                    return json({"message": "Hash is invalid (in local database)", "status": 200})
 
         # Validate in blockchain if not found locally
-        ipfs_hash = DocuProofContract().get_ipfs_hash(proof_id)
-        if ipfs_hash:
-            data = IPFSClient().get_json(ipfs_hash)
-            for item in data:
-                if item["uuid"] == uuid.replace("-", ""):
-                    if item["sha256"] == sha256:
-                        return json({"message": "Hash is valid (on blockchain)", "status": 200})
-                    else:
-                        return json({"message": "Hash is invalid (on blockchain)", "status": 200})
+        try:
+            ipfs_hash = DocuProofContract().get_ipfs_hash(proof_id)
+            if ipfs_hash:
+                data = IPFSClient().get_json(ipfs_hash)
+                for item in data:
+                    if item["uuid"] == uuid.replace("-", ""):
+                        if item["sha256"] == sha256:
+                            return json({"message": "Hash is valid (on blockchain)", "status": 200})
+                        else:
+                            return json({"message": "Hash is invalid (on blockchain)", "status": 200})
 
-            raise HttpInternalServerError("UUID not found in IPFS object")
+                raise HttpInternalServerError("UUID not found in IPFS object")
+        except ContractLogicError:
+            raise Http404("Proof ID not found in blockchain")
 
         raise Http404
 

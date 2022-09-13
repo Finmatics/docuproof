@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime
 
-from tortoise import Model, fields, transactions
+from tortoise import Model, fields
 from tortoise.fields.relational import ForeignKeyFieldInstance, ReverseRelation
 
 from docuproof.blockchain import DocuProofContract
@@ -17,6 +18,7 @@ class Batch(TimestampMixin, Model):
     id = fields.BigIntField(pk=True)
 
     proof_id = fields.UUIDField(unique=True, default=uuid.uuid4)
+    uploaded_at = fields.DatetimeField(null=True)
 
     files: ReverseRelation
 
@@ -35,10 +37,8 @@ class Batch(TimestampMixin, Model):
         contract = DocuProofContract()
         contract.add_file(str(self.proof_id), ipfs_hash)
 
-        # Death smiles at us all. All a man can do is smile back.
-        async with transactions.in_transaction():
-            await files.delete()
-            await self.delete()
+        self.uploaded_at = datetime.now()
+        await self.save(update_fields=["uploaded_at"])
 
 
 class File(TimestampMixin, Model):
