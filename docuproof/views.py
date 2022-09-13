@@ -11,7 +11,12 @@ from docuproof.decorators import token_required
 from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
 from docuproof.ipfs import IPFSClient
 from docuproof.models import Batch, File
-from docuproof.utils import get_bytes_hash, get_file_hash, write_pdf_metadata
+from docuproof.utils import (
+    get_bytes_hash,
+    get_file_hash,
+    get_pdf_metadata,
+    write_pdf_metadata,
+)
 
 
 async def health(request: Request) -> HTTPResponse:
@@ -54,20 +59,15 @@ class StoreView(HTTPMethodView):
 
 class ValidateView(HTTPMethodView):
     async def post(self, request: Request) -> HTTPResponse:
-        form = request.form
         files = request.files
-        if not form or not files:
-            raise HttpBadRequest("Invalid input data")
-
-        if not (uuid := form.get("uuid", None)):
-            raise HttpBadRequest("Missing field `uuid`")
-
-        if not (proof_id := form.get("proof_id", None)):
-            raise HttpBadRequest("Missing field `proof_id`")
-
-        if not (file := files.get("file", None)):
+        if not files or not (file := files.get("file", None)):
             raise HttpBadRequest("Missing PDF file")
 
+        metadata = get_pdf_metadata(file=BytesIO(file.body))
+        if not (uuid := metadata.get("/UUID", None)):
+            raise HttpBadRequest("Missing UUID in PDF metadata")
+        if not (proof_id := metadata.get("/ProofID", None)):
+            raise HttpBadRequest("Missing Proof ID in PDF metadata")
         sha256 = get_bytes_hash(file.body)
 
         if file_obj := await File.filter(uuid=uuid).first():

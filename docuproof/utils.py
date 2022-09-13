@@ -35,6 +35,11 @@ def write_pdf_metadata(file: BytesIO, metadata: dict[str, str]) -> BytesIO:
     return buffer
 
 
+def get_pdf_metadata(file: BytesIO) -> dict[str, str]:
+    reader = PdfReader(file)
+    return reader.getDocumentInfo()
+
+
 def get_file_hash(file: BytesIO) -> str:
     content = file.read()
     file.seek(0)
