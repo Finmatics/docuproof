@@ -1,5 +1,7 @@
 import uuid
 from datetime import datetime
+from enum import IntEnum
+from typing import Any
 
 from tortoise import Model, fields
 from tortoise.fields.relational import ForeignKeyFieldInstance, ReverseRelation
@@ -15,17 +17,23 @@ class TimestampMixin:
 
 
 class Batch(TimestampMixin, Model):
+    class Kind(IntEnum):
+        UPLOAD = 1
+        CACHE = 2
+
     id = fields.BigIntField(pk=True)
 
     proof_id = fields.UUIDField(unique=True, default=uuid.uuid4)
     uploaded_at = fields.DatetimeField(null=True)
+
+    kind = fields.IntEnumField(Kind, default=Kind.UPLOAD)
 
     files: ReverseRelation
 
     @staticmethod
     async def get_current_batch() -> "Batch":
         threshold_dt = get_batch_threshold_dt()
-        if not (batch := await Batch.filter(created_at__gt=threshold_dt).first()):
+        if not (batch := await Batch.filter(kind=Batch.Kind.UPLOAD, created_at__gt=threshold_dt).first()):
             batch = await Batch.create()
         return batch
 
@@ -39,6 +47,16 @@ class Batch(TimestampMixin, Model):
 
         self.uploaded_at = datetime.now()
         await self.save(update_fields=["uploaded_at"])
+
+    @classmethod
+    async def cache_json_data(cls, proof_id: str, data: dict[str, Any]) -> "Batch":
+        batch = await cls.create(proof_id=proof_id, kind=cls.Kind.CACHE)
+        files = []
+        for item in data:
+            files.append(File(batch=batch, uuid=item["uuid"], sha256=item["sha256"]))
+
+        await File.bulk_create(files)
+        return batch
 
 
 class File(TimestampMixin, Model):

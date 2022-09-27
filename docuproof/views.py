@@ -84,12 +84,12 @@ class ValidateView(HTTPMethodView):
             ipfs_hash = DocuProofContract().get_ipfs_hash(proof_id)
             if ipfs_hash:
                 data = IPFSClient().get_json(ipfs_hash)
-                for item in data:
-                    if item["uuid"] == uuid:
-                        if item["sha256"] == sha256:
-                            return json({"message": "Hash is valid (on blockchain)", "status": 200})
-                        else:
-                            return json({"message": "Hash is invalid (on blockchain)", "status": 200})
+                cached_batch = await Batch.cache_json_data(proof_id, data)
+                if file_obj := await File.filter(batch=cached_batch, uuid=uuid).first():
+                    if file_obj.sha256 == sha256:
+                        return json({"message": "Hash is valid (on blockchain)", "status": 200})
+                    else:
+                        return json({"message": "Hash is invalid (on blockchain)", "status": 200})
 
                 raise HttpInternalServerError("UUID not found in IPFS object")
         except ContractLogicError:
