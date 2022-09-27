@@ -6,7 +6,7 @@ from typing import Any
 class UUIDEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, uuid.UUID):
-            return o.hex
+            return str(o)
 
         return super().default(o)
 

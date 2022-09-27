@@ -85,7 +85,7 @@ class ValidateView(HTTPMethodView):
             if ipfs_hash:
                 data = IPFSClient().get_json(ipfs_hash)
                 for item in data:
-                    if item["uuid"] == uuid.replace("-", ""):
+                    if item["uuid"] == uuid:
                         if item["sha256"] == sha256:
                             return json({"message": "Hash is valid (on blockchain)", "status": 200})
                         else:
