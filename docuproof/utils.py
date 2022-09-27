@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import urlparse
 
-from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2 import DocumentInformation, PdfReader, PdfWriter
 from tortoise import timezone
 
 from docuproof.config import Config
@@ -35,7 +35,7 @@ def write_pdf_metadata(file: BytesIO, metadata: dict[str, str]) -> BytesIO:
     return buffer
 
 
-def get_pdf_metadata(file: BytesIO) -> dict[str, str]:
+def get_pdf_metadata(file: BytesIO) -> DocumentInformation | None:
     reader = PdfReader(file)
     return reader.getDocumentInfo()
 

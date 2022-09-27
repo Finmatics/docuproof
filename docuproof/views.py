@@ -66,6 +66,8 @@ class ValidateView(HTTPMethodView):
             raise HttpBadRequest("Missing PDF file")
 
         metadata = get_pdf_metadata(file=BytesIO(file.body))
+        if not metadata:
+            raise HttpBadRequest("Missing metadata in PDF file")
         if not (uuid := metadata.get("/UUID", None)):
             raise HttpBadRequest("Missing UUID in PDF metadata")
         if not (proof_id := metadata.get("/ProofID", None)):

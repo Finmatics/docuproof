@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 from enum import IntEnum
-from typing import Any
 
 from tortoise import Model, fields
 from tortoise.fields.relational import ForeignKeyFieldInstance, ReverseRelation
@@ -49,7 +48,7 @@ class Batch(TimestampMixin, Model):
         await self.save(update_fields=["uploaded_at"])
 
     @classmethod
-    async def cache_json_data(cls, proof_id: str, data: dict[str, Any]) -> "Batch":
+    async def cache_json_data(cls, proof_id: str, data: dict) -> "Batch":
         batch = await cls.create(proof_id=proof_id, kind=cls.Kind.CACHE)
         files = []
         for item in data:
