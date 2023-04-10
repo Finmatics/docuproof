@@ -8,7 +8,7 @@ from docuproof.ipfs import IPFSClient
 from docuproof.tasks import TASK_LIST
 from docuproof.utils import convert_url_to_multiaddr
 from docuproof.views import bp as APIBlueprint
-from docuproof.views import health
+from docuproof.views import debug_index, health
 
 load_dotenv()
 
@@ -16,6 +16,9 @@ application = Sanic("docuproof")
 
 application.blueprint(APIBlueprint)
 application.add_route(health, "/health")
+
+if Config.SHOW_FRONTEND:
+    application.add_route(debug_index, "/")
 
 if Config.RUN_BACKGROUND_TASKS:
     for task_func in TASK_LIST:

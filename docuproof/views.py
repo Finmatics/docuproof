@@ -4,10 +4,12 @@ from sanic import Blueprint
 from sanic.request import Request
 from sanic.response import HTTPResponse, json, raw
 from sanic.views import HTTPMethodView
+from sanic_ext import render
 from tortoise.exceptions import IntegrityError
 from web3.exceptions import ContractLogicError
 
 from docuproof.blockchain import DocuProofContract
+from docuproof.config import Config
 from docuproof.decorators import token_required
 from docuproof.exceptions import Http404, HttpBadRequest, HttpInternalServerError
 from docuproof.ipfs import IPFSClient
@@ -16,12 +18,21 @@ from docuproof.utils import (
     get_bytes_hash,
     get_file_hash,
     get_pdf_metadata,
+    is_valid_uuid,
     write_pdf_metadata,
 )
 
 
 async def health(request: Request) -> HTTPResponse:
     return json({"status": "ok"})
+
+
+async def debug_index(request: Request) -> HTTPResponse:
+    return await render(
+        "index.html",
+        environment=Config.TEMPLATE_ENVIRONMENT,
+        context={"token": Config.PRIVATE_ENDPOINTS_TOKEN},
+    )
 
 
 bp = Blueprint("api", url_prefix="/api", version=1)
@@ -40,6 +51,9 @@ class StoreView(HTTPMethodView):
 
         if not (uuid := form.get("uuid", None)):
             raise HttpBadRequest("Missing field `uuid`")
+
+        if not is_valid_uuid(uuid):
+            raise HttpBadRequest("Invalid UUID")
 
         if not (file := files.get("file", None)):
             raise HttpBadRequest("Missing PDF file")

@@ -1,4 +1,5 @@
 import hashlib
+import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import urlparse
@@ -37,7 +38,7 @@ def write_pdf_metadata(file: BytesIO, metadata: dict[str, str]) -> BytesIO:
 
 def get_pdf_metadata(file: BytesIO) -> DocumentInformation | None:
     reader = PdfReader(file)
-    return reader.getDocumentInfo()
+    return reader.metadata
 
 
 def get_file_hash(file: BytesIO) -> str:
@@ -48,3 +49,12 @@ def get_file_hash(file: BytesIO) -> str:
 
 def get_bytes_hash(by: bytes) -> str:
     return hashlib.sha256(by).hexdigest()
+
+
+def is_valid_uuid(value: str) -> bool:
+    try:
+        uuid.UUID(value)
+    except ValueError:
+        return False
+
+    return True
