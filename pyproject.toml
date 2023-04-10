@@ -6,13 +6,13 @@ authors = ["Kamil Marut <kamil@kamilmarut.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-python-dotenv = "^0.20.0"
-sanic = {extras = ["ext"], version = "^22.6.0"}
-tortoise-orm = "^0.19.2"
+python-dotenv = "^1.0.0"
+sanic = {extras = ["ext"], version = "^23.3.0"}
+tortoise-orm = "^0.19.3"
 Jinja2 = "^3.1.2"
-web3 = {version = "6.0.0b4", allow-prereleases = true}
+web3 = {version = "6.1.0"}
 ipfshttpclient = {version = "0.8.0a2", allow-prereleases = true}
-PyPDF2 = "^2.10.6"
+pypdf = "^3.7.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"

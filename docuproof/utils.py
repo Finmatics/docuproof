@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import urlparse
 
-from PyPDF2 import DocumentInformation, PdfReader, PdfWriter
+from pypdf import DocumentInformation, PdfReader, PdfWriter
 from tortoise import timezone
 
 from docuproof.config import Config

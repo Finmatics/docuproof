@@ -59,6 +59,20 @@ $ export FROM_WALLET_PRIVATE_KEY=<YOUR-WALLET-PRIVATE-KEY>
 $ brownie run scripts/deploy.py --network mainnet
 ```
 
+### Additional test networks
+
+In order to deploy the smart contract to a test network which wasn't included by default, we can use the following Brownie command:
+```
+# Sepolia
+$ brownie networks add Ethereum sepolia \
+  host='https://sepolia.infura.io/v3/$WEB3_INFURA_PROJECT_ID' \
+  chainid=11155111 \
+  name='Sepolia (Infura)' \
+  explorer='https://api-sepolia.etherscan.io/api' \
+  multicall2='0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696' \
+  provider=infura
+```
+
 ## Testing
 
 To run the complete test suite:

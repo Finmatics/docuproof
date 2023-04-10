@@ -26,7 +26,7 @@ class DocuProofContract(metaclass=SingletonMeta):
         if Config.POA_BLOCKCHAIN:
             self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-        if not self.web3.isConnected():
+        if not self.web3.is_connected:
             raise Exception("Could not connect to Ethereum node")
 
         self.contract = self.web3.eth.contract(address=Config.CONTRACT_ADDRESS, abi=self.abi)
